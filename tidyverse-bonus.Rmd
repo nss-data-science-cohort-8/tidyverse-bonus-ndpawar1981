@@ -1,0 +1,93 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+In this project, you'll practice working with data using the tidyverse libraries. You'll be working with data on each of 145 school districts and the State of Tennessee. This data contains, for the 2014-2015 school year:
+
+Proficiency rates on state tests
+Student demographics
+Chronic absenteeism
+Discipline (suspension, expulsion) rates
+High school graduation, dropout rates
+Average ACT composite scores
+A region in Tennessee
+Create an R notebook to answer the following questions.
+
+
+```{r}
+library(tidyverse)
+
+```
+
+1.Read in districts.csv into a tibble named districts.
+
+
+
+```{r}
+districts <- read.csv('./data/districts.csv')
+districts
+```
+2.Notice that the first row corresponds to the whole State of Tennessee. Remove this row and save the result back to districts.
+
+```{r}
+districts <- districts %>%
+  filter(system_name != 'State of Tennessee')
+
+districts
+```
+
+3.How many districts have a proficiency rate of at least 80% for both alg_1 and eng_1?
+
+```{r}
+districts %>%
+  filter(alg_1 >= 80 & eng_1 >= 80) %>%
+  count(totalProficientDistricts = n())
+```
+4.How many districts have a proviciency rate less than 50% for either alg_1 or eng_1?
+
+```{r}
+districts %>%
+  filter(alg_1 <50 | eng_1 < 50) %>%
+  count(totalLessProficientDistricts = n())
+```
+5.Which district has the lowest graduation rate?
+```{r}
+districts %>% 
+  arrange((grad))%>%
+    head(1)
+```
+
+6.Within the Mid Cumberland region, which district has the highest ACT composite?
+
+```{r}
+districts %>%
+  filter(region == 'Mid Cumberland') %>%
+  arrange(desc(act_composite)) %>%
+  head(1) %>%
+  select(system_name)
+  
+  
+```
+7. Create a scatter plot to compare alg_1 proficiency rates to alg_2 rates. What do you notice? Facet this plot by region. Does anything stand out when you facet the plots?
+
+```{r}
+ggplot(districts,aes(x=alg_1,y=alg_2))+geom_point()
+```
+Based on the scatter plot, it shows the positive relation ship. One obsrvation is that the student didn't score similar grades in alg_2 compared to alg_1. We can see there are few outliers where students did good in alg_1 but not in alg_2. The sad part of this is that almost 50% of students failed in both alg1 and alg2 where they are below 70.
+
+```{r}
+ggplot(districts, aes(x=alg_1, y=alg_2)) +  geom_point()+  facet_wrap(~region) 
+```
+
+NOrthwest region stands out good in this plot where we see students are doing good compared to other region. Upper cumberland region has some different results. Students are good in alg-1 there but can see that they were not asthat good in alg_2. Rests all are pretty positive relationship between alg_1 and alg_2
+
+
+8.When creating this bar chart you may have noticed that some districts have missing enrollment values. For how many districts is this the case?
+```{r}
+sum(is.na(districts$enrollment))
+```
+
